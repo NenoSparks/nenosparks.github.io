@@ -1,0 +1,23 @@
+body {
+    margin: 0;
+}
+#map {
+    display: inline-block;
+    height: 55vh;
+    width: 75vw;
+    border: 2px solid rgb(197, 179, 179);
+    padding: 12px 12px;
+}
+
+#frame {
+    text-align: center;
+}
+
+.layer-control {
+    position: absolute;
+    background: #fff;
+    padding: 10px;
+    right: 10px;
+    top: 10px;
+    z-index: 10;
+}
