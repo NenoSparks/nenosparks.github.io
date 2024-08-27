@@ -1,34 +1,103 @@
+<!DOCTYPE html>
+
 <html>
-  <head>
-    <link href="https://unpkg.com/maplibre-gl@3.x/dist/maplibre-gl.css" rel="stylesheet" />
-    <style>
-      body { margin: 0; }
-      #map { height: 100vh; }
-    </style>
-  </head>
 
-  <body>
-    <div id="map" />
-    <script src="https://unpkg.com/maplibre-gl@3.x/dist/maplibre-gl.js"></script>
-    <script src="https://unpkg.com/@aws/amazon-location-utilities-auth-helper@1.x/dist/amazonLocationAuthHelper.js"></script>
-    <script>
-      const identityPoolId = "us-east-1:33333b78-a910-4269-b721-9cefc496b59d"
-      const mapName = "esri-nav-test"
-      const region = "us-east-1";
+<head>
+    <link href="https://location.aws.com/scripts/maplibre-gl@3.3.1/dist/maplibre-gl.css" rel="stylesheet" />
+    <link href="styles/style.css" rel="stylesheet" />
+</head>
 
-      async function initializeMap() {
-        const authHelper = await amazonLocationAuthHelper.withIdentityPoolId(identityPoolId);
-        const map = new maplibregl.Map({
-          container: "map",
-          center: [-123.115898, 49.295868],
-          zoom: 10,
-          style: `https://maps.geo.${region}.amazonaws.com/maps/v0/maps/${mapName}/style-descriptor`,
-          ...authHelper.getMapAuthenticationOptions(),
-        });
-        map.addControl(new maplibregl.NavigationControl(), "top-left");
-      }
+<body>
+    <h1>Explore what's happening live now!</h1>
+    <div id="frame">
+        <div id="map"></div>
+        <!-- Layer control -->
+        <div class="layer-control">
+            <input
+                class="layer"
+                type="radio"
+                name="map-style"
+                value="esri-nav-test"
+                checked="checked"
+            />
+            <label for="light">Map</label>
+            <input
+                class="layer"
+                type="radio"
+                name="map-style"
+                value="esri-imagery-test"
+            />
+            <label for="dark">Satellite</label>
+        </div>
+        <script src="https://location.aws.com/scripts/maplibre-gl@3.3.1/dist/maplibre-gl.js"></script>
+        <script
+            src="https://location.aws.com/scripts/@aws/amazon-location-utilities-auth-helper@1.0.2/dist/amazonLocationAuthHelper.js"></script>
+        <script>
+            async function initializeMap() {
+                const identityPoolId = "us-east-1:72a15540-80f6-42fe-b695-081c6a1dde58";
+                const mapName = "esri-nav-test";
+                const region = identityPoolId.split(":")[0];
 
-      initializeMap();
-    </script>
-  </body>
+                // Create an authentication helper instance using credentials from Cognito
+                const authHelper =
+                    await amazonLocationAuthHelper.withIdentityPoolId(
+                        identityPoolId
+                    );
+
+                // Initialize the map
+                const map = new maplibregl.Map({
+                    container: "map",
+                    // Initial map centerpoint
+                    center: [-123.1187, 49.2819],
+                    // Initial zoom level
+                    zoom: 10,
+                    style: `https://maps.geo.${region}.amazonaws.com/maps/v0/maps/${mapName}/style-descriptor`,
+                    hash: true,
+                    // Provides options required to make requests to Amazon Location
+                    ...authHelper.getMapAuthenticationOptions(),
+                });
+
+                // Add navigation controls
+                map.addControl(
+                    new maplibregl.NavigationControl(),
+                    "top-left"
+                );
+
+                // Configure a new popup
+                const popup = new maplibregl.Popup({
+                    offset: 35,
+                }).setHTML(
+                    `<h3>Amazon YVR11</h3>
+                    <p>510 W Georgia St #14, Vancouver, BC V6B 0M3</p>`
+                );
+
+                // Add a new marker and popup
+                const marker = new maplibregl.Marker()
+                        .setLngLat([-123.11685, 49.2811])
+                        .setPopup(popup)
+                        .addTo(map);
+
+                // Switch map styles
+                const mapStyles = document.querySelectorAll(
+                    ".layer-control .layer"
+                );
+
+                console.log(mapStyles);
+
+                for (const mapStyle of mapStyles) {
+                    mapStyle.onclick = (style) => {
+                        const styleName = style.target.value;
+                        map.setStyle(
+                            
+                        `https://maps.geo.${region}.amazonaws.com/maps/v0/maps/${styleName}/style-descriptor`
+                        );
+                    };
+                }
+            }
+
+            initializeMap();
+        </script>
+    </div>
+</body>
+
 </html>
